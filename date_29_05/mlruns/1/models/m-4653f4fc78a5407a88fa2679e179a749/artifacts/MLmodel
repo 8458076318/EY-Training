@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/Administrator/Documents/Python Training/AI-ML-Training-Projects/date_29_05/mlruns/1/models/m-4653f4fc78a5407a88fa2679e179a749/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.14.5
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.12.0
+model_id: m-4653f4fc78a5407a88fa2679e179a749
+model_size_bytes: 158343
+model_uuid: m-4653f4fc78a5407a88fa2679e179a749
+prompts: null
+run_id: 5b3d551ff98e4c3a898255c8fa7f9e88
+utc_time_created: '2026-05-31 14:27:00.918280'
