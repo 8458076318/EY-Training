@@ -1,0 +1,10 @@
+{
+  "name": "day3-node-server",
+  "version": "1.0.0",
+  "description": "Simple node server for Day 3 task",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
