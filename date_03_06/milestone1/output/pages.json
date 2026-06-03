@@ -1,0 +1,1 @@
+[{"page_no":1,"word_count":114,"first_50_chars":"-- Create schema  CREATE SCHEMA IF NOT EXISTS shop"},{"page_no":2,"word_count":98,"first_50_chars":"order_id      SERIAL PRIMARY KEY,    customer_id  "},{"page_no":3,"word_count":144,"first_50_chars":"10-Minute Coding Activity  Duration: 10 minutes (s"}]
