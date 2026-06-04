@@ -1,0 +1,93 @@
+================================================================================
+   MSF FIELD OPERATIONS DATA PLATFORM: ELT vs ETL DECISION
+================================================================================
+
+SCENARIO RECAP
+--------------
+MSF needs to consolidate data from 400 field sites across 70+ countries into a
+central analytics hub in Geneva.
+
+Data types:
+  - Patient intake forms
+  - Drug inventory logs
+  - Outbreak reports
+  - Staff deployment records
+
+Tags: Global NGO | Multi-source data | Cloud Infrastructure | Sensitive records
+
+================================================================================
+RECOMMENDATION: ELT (Extract → Load → Transform)
+================================================================================
+
+JUSTIFICATION
+-------------
+
+1. VOLUME & MULTI-SOURCE COMPLEXITY
+   - 400 field sites means heterogeneous data formats — different languages,
+     form versions, offline-collected CSVs, mobile inputs, etc.
+   - ELT lets you load raw data first into a cloud data lake/warehouse
+     (e.g., BigQuery, Snowflake) and transform later.
+   - This preserves the original records for auditability.
+   - With ETL, you'd need to pre-define every transformation rule before data
+     arrives — near impossible across 70+ countries with inconsistent field
+     conditions.
+
+2. CLOUD INFRASTRUCTURE
+   - The scenario explicitly flags Cloud Infrastructure.
+   - ELT is purpose-built for cloud-native stacks.
+   - Cloud warehouses have the compute to transform at scale in-place —
+     no need for a separate transformation server.
+
+3. SENSITIVE RECORDS & AUDIT TRAIL
+   - Patient data requires raw record retention for compliance
+     (GDPR, humanitarian data protocols).
+   - ELT stores the untouched source data, giving you a full audit trail.
+   - ETL transforms before storing, which can destroy original records.
+
+4. OUTBREAK REPORTS = UNPREDICTABLE SCHEMA
+   - Outbreak data evolves rapidly — new diseases, new fields, emergency forms.
+   - ELT handles schema-on-read, meaning Geneva analysts can re-transform
+     historical data as needs change.
+   - ETL would require pipeline rebuilds each time the schema changes.
+
+5. LATENCY FROM 400 REMOTE SITES
+   - Field sites may have intermittent connectivity.
+   - ELT favors fast, lightweight loads (raw data pushed when connection is
+     available), with heavy transformation happening centrally.
+   - ETL requires stable connections to complete transformation before loading.
+
+================================================================================
+WHEN ETL MIGHT HAVE BEEN CONSIDERED
+================================================================================
+
+  Signal                  | ETL Argument                | Why It Loses Here
+  ------------------------|-----------------------------|-----------------------
+  Sensitive records       | Mask PII before loading     | Can mask post-load
+                          |                             | in ELT too
+  Bandwidth constraints   | Send only clean data        | Raw data isn't
+                          |                             | necessarily larger
+  Legacy destination      | Structured input required   | Cloud warehouse
+  system                  |                             | handles raw fine
+
+================================================================================
+FINAL VERDICT
+================================================================================
+
+  Factor                          | Winner
+  --------------------------------|--------
+  Cloud infrastructure            | ELT ✓
+  400+ heterogeneous sources      | ELT ✓
+  Sensitive records / audit       | ELT ✓
+  Evolving outbreak schemas       | ELT ✓
+  Intermittent field connectivity | ELT ✓
+
+CONCLUSION:
+  Use ELT. The cloud-native setup, schema variability, audit requirements,
+  and the sheer scale of 400 field sites all point decisively to ELT.
+
+  Recommended Stack:
+    - Cloud Warehouse : BigQuery or Snowflake
+    - Transformation  : dbt (data build tool)
+    - Ingestion       : Airbyte or Fivetran
+
+================================================================================
