@@ -1,0 +1,136 @@
+PayStream — Queue vs Event Bus: Deep Dive
+==========================================
+
+BACKGROUND MENTAL MODEL
+------------------------
+A Queue is like a task list — someone writes a to-do item, exactly one worker picks it up
+and does it, checks it off. The sender CARES that the work gets done.
+
+An Event Bus is like a public notice board — someone pins an announcement, and anyone
+interested reads it. The poster doesn't care who reads it or how many do.
+
+
+A — Settlement Command → QUEUE
+-------------------------------
+What's happening?
+  Payment Core tells Ledger Service: "Settle transaction #TX-48291 for ₹5,000."
+
+Why Queue?
+  - This is a COMMAND ("do X"), not a fact ("X happened").
+  - Exactly-once guarantee is critical. Double-settlement = financial disaster.
+  - Retry + dead-letter handling: if Ledger Service is down, the queue holds and retries.
+  - Consumer set is fixed and small — only Ledger Service settles payments.
+  - Load balancing across multiple Ledger workers at 4M transactions/day.
+
+What would go wrong with Event Bus?
+  Multiple subscribers could each attempt settlement, causing duplicate ledger entries.
+
+
+B — Payment Received Broadcast → EVENT BUS
+-------------------------------------------
+What's happening?
+  Payment Core announces: "Payment #TX-48291 completed."
+
+Why Event Bus?
+  - This is a FACT ("X happened"), not a command.
+  - Multiple independent services need to react:
+      * Ledger Service — update account balances
+      * Fraud Engine — update risk model
+      * Notification Hub — send confirmation to merchant
+      * Analytics Pipeline — record the transaction
+  - Payment Core doesn't know or care who's listening.
+  - New subscribers can be added in future without touching Payment Core.
+  - Textbook pub-sub / fan-out pattern.
+
+What would go wrong with Queue?
+  Only one service would receive the event — tight coupling, fragile design.
+
+
+C — SMS/Push Notifications → QUEUE
+------------------------------------
+What's happening?
+  Notification Hub needs to send an SMS or push notification to a merchant or user.
+
+Why Queue?
+  - Each notification must be delivered exactly once to exactly one worker.
+  - The sender cares that the work gets done — delivery confirmation matters.
+  - Retry logic is essential — SMS gateways and push services fail intermittently.
+  - Dead-letter queue catches permanently failing messages for later inspection.
+  - Scale workers horizontally to drain the queue in parallel.
+
+What would go wrong with Event Bus?
+  Multiple worker instances might each send the same SMS — user gets spammed.
+
+
+D — Fraud Score Request → QUEUE
+---------------------------------
+What's happening?
+  Before authorising a payment, Payment Core asks the Fraud Engine for a risk score.
+
+Why Queue?
+  - This is a synchronous-style COMMAND wrapped in async messaging.
+  - Exactly one Fraud Engine instance should evaluate each transaction.
+  - The sender deeply cares about completion — cannot authorise without the score.
+  - Consumer set is fixed — only the Fraud Engine produces fraud scores.
+  - Retry handling: if Fraud Engine is briefly overloaded, request waits rather than drops.
+  - Load balancing across multiple Fraud Engine workers at 4M transactions/day.
+
+What would go wrong with Event Bus?
+  No natural support for request-response; no guarantee of exactly-one processing.
+
+
+E — Account State Change Events → EVENT BUS
+--------------------------------------------
+What's happening?
+  When an account is frozen, upgraded, or closed: "Account #ACC-9921 state → FROZEN."
+
+Why Event Bus?
+  - Purely a FACT broadcast — reporting something that happened.
+  - Multiple independent services care:
+      * Notification Hub — alert the user
+      * Fraud Engine — update risk profile
+      * Analytics Pipeline — record the state change
+      * Compliance Service — flag the event
+  - Producer doesn't know or care who consumes this.
+  - Extensibility: new services can subscribe without modifying the producer.
+  - Fan-out is the explicit goal — one event, many reactions.
+
+What would go wrong with Queue?
+  Producer would need to know all downstream services — fragile and hard to extend.
+
+
+F — End-of-Day Reconciliation → QUEUE
+---------------------------------------
+What's happening?
+  At end of day, a job is triggered: "Reconcile all of today's transactions."
+
+Why Queue?
+  - This is a SCHEDULED COMMAND/TASK — not an event announcement.
+  - Exactly-once processing is critical — running reconciliation twice = incorrect reports.
+  - Retry + dead-letter handling essential for this important batch job.
+  - Consumer set is fixed and small — only the Reconciliation Service runs this.
+  - Visibility: monitor whether job was picked up, processing, completed, or failed.
+  - Auditability — crucial for an end-of-day financial operation.
+
+What would go wrong with Event Bus?
+  No guarantee the job runs exactly once; event could be lost if no subscriber is active.
+
+
+SUMMARY TABLE
+-------------
+ID  Integration                  Pattern      Core Reason
+--  ---------------------------  -----------  ----------------------------------------
+A   Settlement command           QUEUE        Command, exactly-once, retry critical
+B   Payment received broadcast   EVENT BUS    Fact, fan-out to many consumers
+C   SMS/push notifications       QUEUE        Exactly-once delivery, retry on failure
+D   Fraud score request          QUEUE        Command + response, exactly-one processor
+E   Account state change events  EVENT BUS    Fact, multiple independent subscribers
+F   End-of-day reconciliation    QUEUE        Scheduled command, exactly-once, auditability
+
+
+THE GOLDEN RULE
+---------------
+"Is this a command (do X) or a fact (X happened)?"
+
+  Command → QUEUE     (one worker, accountability, retry)
+  Fact    → EVENT BUS (broadcast, decoupled, extensible)
