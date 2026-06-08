@@ -1,0 +1,46 @@
+2026-06-05 11:42:46.662 | INFO     | __main__:<module>:80 - Config loaded — schedule: 0 6 * * * | output: data\processed
+2026-06-05 11:42:46.665 | INFO     | __main__:read:138 - Generated 1,000 synthetic rows (seed=42)
+2026-06-05 11:42:46.919 | INFO     | __main__:validate_batch:208 - Validation: 879 valid | 121 errors | 87.9% pass rate
+2026-06-05 11:42:46.920 | WARNING  | __main__:validate_batch:214 - Pass rate 87.9% is below threshold 95% — investigate upstream data
+2026-06-05 11:42:47.092 | INFO     | __main__:build_ge_suite:279 - GE suite: 7/7 expectations passed
+2026-06-05 11:42:47.107 | INFO     | __main__:<module>:372 - Transform complete. Columns: ['id', 'amount', 'category', 'ts', 'tier', 'date', 'hour', 'day_of_week', 'amount_z']
+2026-06-05 11:42:47.113 | INFO     | __main__:run_quality_gate:454 -   PASS null_rate            value=0.0000  threshold=0.05
+2026-06-05 11:42:47.114 | INFO     | __main__:run_quality_gate:454 -   PASS row_count            value=879.0000  threshold=100.0
+2026-06-05 11:42:47.114 | INFO     | __main__:run_quality_gate:454 -   PASS amount_mean          value=99.3976  threshold=100.0
+2026-06-05 11:42:47.114 | INFO     | __main__:run_quality_gate:454 -   PASS dup_id_rate          value=0.0000  threshold=0.01
+2026-06-05 11:42:47.115 | INFO     | __main__:run_quality_gate:454 -   PASS amount_z_range       value=3.2584  threshold=5.0
+2026-06-05 11:42:47.115 | INFO     | __main__:run_quality_gate:468 - Quality gate PASSED — all checks green
+2026-06-05 11:42:47.118 | WARNING  | __main__:store_parquet:498 - Parquet engine unavailable; writing CSV fallback. Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - `Import pyarrow` failed. pyarrow is required for parquet support. Use pip or conda to install the pyarrow package.
+ - `Import fastparquet` failed. fastparquet is required for parquet support. Use pip or conda to install the fastparquet package.
+2026-06-05 11:42:47.130 | INFO     | __main__:store_parquet:503 - Stored 879 rows -> data\processed\date=2026-06-05\data.csv (58.8 KB)
+2026-06-05 11:42:47.167 | INFO     | __main__:<module>:513 - Round-trip verified: 879 rows read back successfully
+2026-06-05 11:42:47.171 | INFO     | __main__:run_pipeline:555 - ==================================================
+2026-06-05 11:42:47.178 | INFO     | __main__:run_pipeline:556 - Pipeline run STARTED
+2026-06-05 11:42:47.179 | INFO     | __main__:run_pipeline:557 - ==================================================
+2026-06-05 11:42:47.183 | INFO     | __main__:read:138 - Generated 10,000 synthetic rows (seed=42)
+2026-06-05 11:42:47.314 | INFO     | __main__:validate_batch:208 - Validation: 8,901 valid | 1,111 errors | 89.0% pass rate
+2026-06-05 11:42:47.314 | WARNING  | __main__:validate_batch:214 - Pass rate 89.0% is below threshold 95% — investigate upstream data
+2026-06-05 11:42:47.495 | INFO     | __main__:build_ge_suite:279 - GE suite: 7/7 expectations passed
+2026-06-05 11:42:47.531 | INFO     | __main__:run_quality_gate:454 -   PASS null_rate            value=0.0000  threshold=0.05
+2026-06-05 11:42:47.532 | INFO     | __main__:run_quality_gate:454 -   PASS row_count            value=8901.0000  threshold=100.0
+2026-06-05 11:42:47.532 | INFO     | __main__:run_quality_gate:454 -   PASS amount_mean          value=99.7625  threshold=100.0
+2026-06-05 11:42:47.532 | INFO     | __main__:run_quality_gate:454 -   PASS dup_id_rate          value=0.0000  threshold=0.01
+2026-06-05 11:42:47.533 | INFO     | __main__:run_quality_gate:454 -   PASS amount_z_range       value=4.0224  threshold=5.0
+2026-06-05 11:42:47.533 | INFO     | __main__:run_quality_gate:468 - Quality gate PASSED — all checks green
+2026-06-05 11:42:47.534 | WARNING  | __main__:store_parquet:498 - Parquet engine unavailable; writing CSV fallback. Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.
+A suitable version of pyarrow or fastparquet is required for parquet support.
+Trying to import the above resulted in these errors:
+ - `Import pyarrow` failed. pyarrow is required for parquet support. Use pip or conda to install the pyarrow package.
+ - `Import fastparquet` failed. fastparquet is required for parquet support. Use pip or conda to install the fastparquet package.
+2026-06-05 11:42:47.614 | INFO     | __main__:store_parquet:503 - Stored 8,901 rows -> data\processed\date=2026-06-05\data.csv (603.5 KB)
+2026-06-05 11:42:47.614 | INFO     | __main__:run_pipeline:594 - ==================================================
+2026-06-05 11:42:47.615 | INFO     | __main__:run_pipeline:595 - Pipeline run SUCCEEDED
+2026-06-05 11:42:47.615 | INFO     | __main__:run_pipeline:596 - Stats: {'status': 'success', 'raw_rows': 10000, 'valid_rows': 8901, 'validation_errors': 1111, 'output_path': 'data\\processed\\date=2026-06-05\\data.csv'}
+2026-06-05 11:42:47.616 | INFO     | __main__:run_pipeline:597 - ==================================================
+2026-06-05 11:42:47.723 | INFO     | __main__:<module>:641 - Scheduler started | 1 job(s) registered
+2026-06-05 11:42:47.724 | INFO     | __main__:<module>:643 -   Job 'daily_pipeline' | next run: 2026-06-06 06:00:00+05:30
+2026-06-05 11:42:47.725 | INFO     | __main__:<module>:653 - Scheduler stopped cleanly
+2026-06-05 11:42:47.725 | INFO     | __main__:<module>:658 - Main pipeline completed; optional notebook extension sections are skipped in script mode.
