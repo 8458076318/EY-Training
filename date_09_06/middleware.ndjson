@@ -1,0 +1,75 @@
+{"breaker": "fraud-api", "old": "<pybreaker.CircuitClosedState object at 0x00000228B4E27E90>", "new": "<pybreaker.CircuitOpenState object at 0x00000228B4E4CB10>", "event": "circuit_breaker.state_change", "level": "warning", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:00.134949Z"}
+{"path": "/health/ready", "method": "GET", "correlation_id": "9431628d-e04c-491c-ae9d-2732ddcaa4df", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.654138Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 14.2, "correlation_id": "9431628d-e04c-491c-ae9d-2732ddcaa4df", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.669711Z"}
+HTTP Request: GET http://127.0.0.1:8000/health/ready "HTTP/1.1 200 OK"
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.687302Z"}
+{"amount": 1500, "currency": "GBP", "correlation_id": "demo-corr-001", "event": "payment.received", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.690298Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.690298Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 1.23, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.692300Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"path": "/payments", "status": 200, "latency_ms": 9.35, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.697282Z"}
+HTTP Request: POST http://127.0.0.1:8000/payments "HTTP/1.1 200 OK"
+{"path": "/metrics", "method": "GET", "correlation_id": "4190b416-22f9-404e-97a6-2294d76d03d5", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.702685Z"}
+{"path": "/metrics", "status": 200, "latency_ms": 9.86, "correlation_id": "4190b416-22f9-404e-97a6-2294d76d03d5", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T03:48:02.712676Z"}
+HTTP Request: GET http://127.0.0.1:8000/metrics "HTTP/1.1 200 OK"
+{"breaker": "fraud-api", "old": "<pybreaker.CircuitClosedState object at 0x0000023FE9F37C90>", "new": "<pybreaker.CircuitOpenState object at 0x0000023FE9F5C910>", "event": "circuit_breaker.state_change", "level": "warning", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:15.670980Z"}
+{"path": "/health/ready", "method": "GET", "correlation_id": "670ff1ee-4be9-4ec0-88c4-b55f9b4823ec", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.264071Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 14.48, "correlation_id": "670ff1ee-4be9-4ec0-88c4-b55f9b4823ec", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.279787Z"}
+HTTP Request: GET http://127.0.0.1:8000/health/ready "HTTP/1.1 200 OK"
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.286738Z"}
+{"amount": 1500, "currency": "GBP", "correlation_id": "demo-corr-001", "event": "payment.received", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.293737Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.298249Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 2.34, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.300245Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"path": "/payments", "status": 200, "latency_ms": 15.53, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.302250Z"}
+HTTP Request: POST http://127.0.0.1:8000/payments "HTTP/1.1 200 OK"
+{"path": "/metrics", "method": "GET", "correlation_id": "30c25e65-1ccb-4e3b-8379-12349ab45af9", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.307258Z"}
+{"path": "/metrics", "status": 200, "latency_ms": 6.94, "correlation_id": "30c25e65-1ccb-4e3b-8379-12349ab45af9", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:01:18.314248Z"}
+HTTP Request: GET http://127.0.0.1:8000/metrics "HTTP/1.1 200 OK"
+{"breaker": "fraud-api", "old": "<pybreaker.CircuitClosedState object at 0x0000020245FB7C10>", "new": "<pybreaker.CircuitOpenState object at 0x0000020245FDC850>", "event": "circuit_breaker.state_change", "level": "warning", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:47.951490Z"}
+{"path": "/health/ready", "method": "GET", "correlation_id": "b721d1e9-4d6c-444b-be1f-225ae5311f95", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.602267Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 10.01, "correlation_id": "b721d1e9-4d6c-444b-be1f-225ae5311f95", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.612262Z"}
+HTTP Request: GET http://127.0.0.1:8000/health/ready "HTTP/1.1 200 OK"
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.633245Z"}
+{"amount": 1500, "currency": "GBP", "correlation_id": "demo-corr-001", "event": "payment.received", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.637271Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.639281Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 1.74, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.641274Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"path": "/payments", "status": 200, "latency_ms": 12.3, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.645270Z"}
+HTTP Request: POST http://127.0.0.1:8000/payments "HTTP/1.1 200 OK"
+{"path": "/metrics", "method": "GET", "correlation_id": "92f91fb3-5344-4365-8f77-b1daf9b219d4", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.655276Z"}
+{"path": "/metrics", "status": 200, "latency_ms": 5.67, "correlation_id": "92f91fb3-5344-4365-8f77-b1daf9b219d4", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:02:50.661272Z"}
+HTTP Request: GET http://127.0.0.1:8000/metrics "HTTP/1.1 200 OK"
+{"breaker": "fraud-api", "old": "<pybreaker.CircuitClosedState object at 0x000002BDA38A7C10>", "new": "<pybreaker.CircuitOpenState object at 0x000002BDA38CC890>", "event": "circuit_breaker.state_change", "level": "warning", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:48.905552Z"}
+Opening tunnel named: http-8000-1e1766f5-d881-471c-ba29-d2f636f585fc
+Overriding default auth token
+t=2026-06-09T09:37:51+0530 lvl=info msg="no configuration paths supplied"
+t=2026-06-09T09:37:51+0530 lvl=info msg="using configuration at default config path" path=C:\\Users\\Administrator\\AppData\\Local\\ngrok\\ngrok.yml
+t=2026-06-09T09:37:51+0530 lvl=info msg="open config file" path=C:\\Users\\Administrator\\AppData\\Local\\ngrok\\ngrok.yml err=nil
+t=2026-06-09T09:37:51+0530 lvl=info msg="FIPS 140 mode" enabled=false
+t=2026-06-09T09:37:51+0530 lvl=info msg="starting web service" obj=web addr=127.0.0.1:4040 allow_hosts=[]
+t=2026-06-09T09:37:52+0530 lvl=info msg="client session established" obj=tunnels.session
+t=2026-06-09T09:37:52+0530 lvl=info msg="tunnel session started" obj=tunnels.session
+t=2026-06-09T09:37:52+0530 lvl=info msg=start pg=/api/tunnels id=9b7b1089c6c3b66c
+t=2026-06-09T09:37:52+0530 lvl=info msg=end pg=/api/tunnels id=9b7b1089c6c3b66c status=200 dur=898.4Âµs
+t=2026-06-09T09:37:52+0530 lvl=info msg=start pg=/api/tunnels id=ac3d1f1e788368f3
+t=2026-06-09T09:37:52+0530 lvl=info msg=end pg=/api/tunnels id=ac3d1f1e788368f3 status=200 dur=315.4Âµs
+t=2026-06-09T09:37:52+0530 lvl=info msg=start pg=/api/tunnels id=055b03aed6077b25
+t=2026-06-09T09:37:52+0530 lvl=info msg=end pg=/api/tunnels id=055b03aed6077b25 status=200 dur=0s
+t=2026-06-09T09:37:52+0530 lvl=info msg=start pg=/api/tunnels id=c363892f2fa1e770
+t=2026-06-09T09:37:52+0530 lvl=info msg="started tunnel" obj=tunnels name=http-8000-1e1766f5-d881-471c-ba29-d2f636f585fc addr=http://localhost:8000 url=https://cornball-diagnosis-anyone.ngrok-free.dev
+t=2026-06-09T09:37:52+0530 lvl=info msg=end pg=/api/tunnels id=c363892f2fa1e770 status=201 dur=687.7816ms
+t=2026-06-09T09:37:53+0530 lvl=info msg="join connections" obj=join id=0a03723c2017 l=127.0.0.1:8000 r=210.89.32.110:11153
+{"path": "/health/ready", "method": "GET", "correlation_id": "9c0e232f-827c-448a-b84a-cede5aa28c41", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:53.775636Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 12.08, "correlation_id": "9c0e232f-827c-448a-b84a-cede5aa28c41", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:53.787332Z"}
+HTTP Request: GET https://cornball-diagnosis-anyone.ngrok-free.dev/health/ready "HTTP/1.1 200 OK"
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.256982Z"}
+{"amount": 1500, "currency": "GBP", "correlation_id": "demo-corr-001", "event": "payment.received", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.262948Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.264959Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 6.11, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.270984Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"path": "/payments", "status": 200, "latency_ms": 16.42, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.272951Z"}
+HTTP Request: POST https://cornball-diagnosis-anyone.ngrok-free.dev/payments "HTTP/1.1 200 OK"
+{"path": "/metrics", "method": "GET", "correlation_id": "519cfa6f-5398-465f-a15e-32a9ca020e7d", "event": "request.started", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.743213Z"}
+{"path": "/metrics", "status": 200, "latency_ms": 13.08, "correlation_id": "519cfa6f-5398-465f-a15e-32a9ca020e7d", "event": "request.completed", "level": "info", "logger": "demo_middleware", "timestamp": "2026-06-09T04:07:54.756615Z"}
+HTTP Request: GET https://cornball-diagnosis-anyone.ngrok-free.dev/metrics "HTTP/1.1 200 OK"
