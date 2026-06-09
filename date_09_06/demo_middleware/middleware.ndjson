@@ -1,0 +1,56 @@
+{"path": "/", "method": "GET", "correlation_id": "3dcbfe08-c8cd-4d52-aef4-1ee833895c0c", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:48:18.187722Z"}
+{"path": "/", "status": 404, "latency_ms": 1.29, "correlation_id": "3dcbfe08-c8cd-4d52-aef4-1ee833895c0c", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:48:18.188734Z"}
+{"path": "/docs", "method": "GET", "correlation_id": "139ba2bd-96b8-4711-9916-06919161fb72", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:48:23.922755Z"}
+{"path": "/docs", "status": 200, "latency_ms": 0.93, "correlation_id": "139ba2bd-96b8-4711-9916-06919161fb72", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:48:23.923724Z"}
+{"path": "/openapi.json", "method": "GET", "correlation_id": "0b587950-1ed0-4f6c-9495-11b10b91d1d1", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:48:24.191343Z"}
+{"path": "/openapi.json", "status": 200, "latency_ms": 4.66, "correlation_id": "0b587950-1ed0-4f6c-9495-11b10b91d1d1", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:48:24.195344Z"}
+1 change detected
+1 change detected
+{"path": "/health/live", "method": "GET", "correlation_id": "2130bf07-e61a-491b-b373-f8d1abbe8fa2", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:49:59.939081Z"}
+{"path": "/health/live", "status": 200, "latency_ms": 4.96, "correlation_id": "2130bf07-e61a-491b-b373-f8d1abbe8fa2", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:49:59.948559Z"}
+{"path": "/health/ready", "method": "GET", "correlation_id": "1eeba178-fbf1-4478-a2b7-aec9916549b3", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:50:09.555693Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 1.62, "correlation_id": "1eeba178-fbf1-4478-a2b7-aec9916549b3", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:50:09.556128Z"}
+{"path": "/health/ready", "method": "GET", "correlation_id": "8c745a2d-fa52-43f3-854b-cbae4b4ea0af", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:50:11.518394Z"}
+{"path": "/health/ready", "status": 200, "latency_ms": 2.14, "correlation_id": "8c745a2d-fa52-43f3-854b-cbae4b4ea0af", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:50:11.520394Z"}
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+1 change detected
+5 changes detected
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:57:58.821504Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-001", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:57:58.821504Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 0.95, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:57:58.821504Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"attempt": 1, "correlation_id": "demo-corr-001", "event": "fraud.retry.simulated_timeout", "level": "warning", "timestamp": "2026-06-09T17:57:58.821504Z"}
+Retrying demo_middleware.services.call_fraud_api_with_retry in 1 seconds as it raised ConnectionError: Fraud API timeout on attempt 1.
+{"attempt": 2, "correlation_id": "demo-corr-001", "event": "fraud.retry.simulated_timeout", "level": "warning", "timestamp": "2026-06-09T17:57:59.837127Z"}
+Retrying demo_middleware.services.call_fraud_api_with_retry in 2 seconds as it raised ConnectionError: Fraud API timeout on attempt 2.
+{"breaker": "fraud-api", "error": "Fraud service down", "correlation_id": "demo-corr-001", "event": "fraud.check.error", "level": "error", "timestamp": "2026-06-09T17:58:01.837151Z"}
+{"path": "/payments", "status": 200, "latency_ms": 3014.36, "correlation_id": "demo-corr-001", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:58:01.837151Z"}
+HTTP Request: POST http://testserver/payments "HTTP/1.1 200 OK"
+{"path": "/admin/logs/search", "method": "GET", "correlation_id": "98b8f130-876f-4daf-bd8e-76832147b216", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:58:01.837151Z"}
+{"path": "/admin/logs/search", "status": 200, "latency_ms": 16.3, "correlation_id": "98b8f130-876f-4daf-bd8e-76832147b216", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:58:01.852779Z"}
+HTTP Request: GET http://testserver/admin/logs/search?correlation_id=demo-corr-001&min_latency_ms=0 "HTTP/1.1 200 OK"
+{"path": "/health/live", "method": "GET", "client_ip": "127.0.0.1", "retry_after": 59, "correlation_id": "192a7c2a-8ec9-46be-8c86-5a5a4bda2162", "event": "request.rate_limited", "level": "warning", "timestamp": "2026-06-09T17:58:20.805894Z"}
+HTTP Request: GET http://testserver/health/live "HTTP/1.1 429 Too Many Requests"
+{"path": "/payments", "method": "POST", "correlation_id": "demo-corr-002", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:58:41.743375Z"}
+{"path": "/mock-downstream/echo", "method": "GET", "correlation_id": "demo-corr-002", "event": "request.started", "level": "info", "timestamp": "2026-06-09T17:58:41.743375Z"}
+{"path": "/mock-downstream/echo", "status": 200, "latency_ms": 0.99, "correlation_id": "demo-corr-002", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:58:41.743375Z"}
+HTTP Request: GET http://testserver/mock-downstream/echo?amount=1500.0&currency=GBP "HTTP/1.1 200 OK"
+{"attempt": 1, "correlation_id": "demo-corr-002", "event": "fraud.retry.simulated_timeout", "level": "warning", "timestamp": "2026-06-09T17:58:41.743375Z"}
+Retrying demo_middleware.services.call_fraud_api_with_retry in 1 seconds as it raised ConnectionError: Fraud API timeout on attempt 1.
+{"attempt": 2, "correlation_id": "demo-corr-002", "event": "fraud.retry.simulated_timeout", "level": "warning", "timestamp": "2026-06-09T17:58:42.743426Z"}
+Retrying demo_middleware.services.call_fraud_api_with_retry in 2 seconds as it raised ConnectionError: Fraud API timeout on attempt 2.
+{"breaker": "fraud-api", "error": "Fraud service down", "correlation_id": "demo-corr-002", "event": "fraud.check.fallback", "level": "warning", "timestamp": "2026-06-09T17:58:44.759003Z"}
+{"path": "/payments", "status": 200, "latency_ms": 3015.66, "correlation_id": "demo-corr-002", "event": "request.completed", "level": "info", "timestamp": "2026-06-09T17:58:44.759003Z"}
+HTTP Request: POST http://testserver/payments "HTTP/1.1 200 OK"
+{"backend": "memory", "event": "app.startup", "level": "info", "timestamp": "2026-06-09T18:02:42.137027Z"}
+{"backend": "memory", "event": "app.shutdown", "level": "info", "timestamp": "2026-06-09T18:04:31.791535Z"}

@@ -1,0 +1,49 @@
+{
+  "title": "Demo Middleware Observability",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(demo_http_requests_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "P99 Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(demo_http_request_duration_seconds_bucket[5m])) by (le))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(payment_errors_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Circuit Breaker Trips",
+      "targets": [
+        {
+          "expr": "sum(rate(circuit_breaker_trips_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
