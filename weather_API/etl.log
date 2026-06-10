@@ -1,0 +1,28 @@
+2026-06-04 23:28:27,026 [INFO] === ETL run started at 2026-06-04T17:58:27.026505 ===
+2026-06-04 23:28:27,052 [INFO] Database initialised at weather_data.db
+2026-06-04 23:28:27,053 [INFO] Processing city: London
+2026-06-04 23:28:28,339 [WARNING] Historical API requires a paid plan. Falling back to current weather for London.
+2026-06-04 23:28:28,921 [ERROR] Failed to fetch current weather for London: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=51.5074&lon=-0.1278&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:28:28,925 [INFO] Processing city: New York
+2026-06-04 23:28:30,152 [WARNING] Historical API requires a paid plan. Falling back to current weather for New York.
+2026-06-04 23:28:30,657 [ERROR] Failed to fetch current weather for New York: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=40.7128&lon=-74.006&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:28:30,661 [INFO] Processing city: Tokyo
+2026-06-04 23:28:31,825 [WARNING] Historical API requires a paid plan. Falling back to current weather for Tokyo.
+2026-06-04 23:28:32,320 [ERROR] Failed to fetch current weather for Tokyo: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=35.6895&lon=139.6917&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:28:32,382 [INFO] === ETL run complete. CSV: csv_exports\weather_20260604_175832.csv ===
+2026-06-04 23:28:32,383 [INFO] Scheduler running. Press Ctrl+C to stop.
+2026-06-04 23:32:05,256 [INFO] [TRIGGER] Scheduled ETL job triggered at 2026-06-04T18:02:05.256505
+2026-06-04 23:32:05,258 [INFO] === ETL run started at 2026-06-04T18:02:05.258504 ===
+2026-06-04 23:32:05,259 [INFO] Database initialised at weather_data.db
+2026-06-04 23:32:05,260 [INFO] Processing city: London
+2026-06-04 23:32:06,480 [WARNING] Historical API requires a paid plan. Falling back to current weather for London.
+2026-06-04 23:32:06,984 [ERROR] Failed to fetch current weather for London: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=51.5074&lon=-0.1278&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:32:06,989 [INFO] Processing city: New York
+2026-06-04 23:32:08,149 [WARNING] Historical API requires a paid plan. Falling back to current weather for New York.
+2026-06-04 23:32:08,669 [ERROR] Failed to fetch current weather for New York: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=40.7128&lon=-74.006&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:32:08,674 [INFO] Processing city: Tokyo
+2026-06-04 23:32:09,828 [WARNING] Historical API requires a paid plan. Falling back to current weather for Tokyo.
+2026-06-04 23:32:10,366 [ERROR] Failed to fetch current weather for Tokyo: 401 Client Error: Unauthorized for url: https://api.openweathermap.org/data/2.5/weather?lat=35.6895&lon=139.6917&appid=YOUR_API_KEY_HERE&units=metric
+2026-06-04 23:32:10,382 [INFO] === ETL run complete. CSV: csv_exports\weather_20260604_180210.csv ===
+2026-06-04 23:32:10,383 [INFO] [OK] Job finished successfully. Output: csv_exports\weather_20260604_180210.csv
+2026-06-04 23:32:10,383 [INFO] Scheduler running. Press Ctrl+C to stop.
