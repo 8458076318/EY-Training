@@ -1,0 +1,15 @@
+column,missing_count,missing_percent
+seq,0,0.0
+timestamp_ms,0,0.0
+red,0,0.0
+ir,0,0.0
+red_corrected,0,0.0
+ir_corrected,0,0.0
+elapsed_ms,0,0.0
+elapsed_seconds,0,0.0
+observed_at,0,0.0
+calendar_date,0,0.0
+calendar_week,0,0.0
+calendar_month,0,0.0
+sample_index,0,0.0
+delta_ms,0,0.0
