@@ -1,4 +1,4 @@
-# date_11_06 PPG EDA Pipeline
+# PPG EDA Pipeline
 
 This folder contains a production-style pipeline for the PPG time-series CSV.
 
