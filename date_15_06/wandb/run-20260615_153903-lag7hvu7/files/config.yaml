@@ -1,0 +1,43 @@
+_wandb:
+    value:
+        cli_version: 0.27.2
+        e:
+            rzq92y5h3l61zm30g5ir2wi0q6jcfws3:
+                codePath: date_15_06\colab2_groq_feedback_loop.py
+                codePathLocal: colab2_groq_feedback_loop.py
+                cpu_count: 4
+                cpu_count_logical: 4
+                disk:
+                    /:
+                        total: "136779730944"
+                        used: "75581816832"
+                email: padhankamala457@gmail.com
+                executable: C:\Users\Administrator\AppData\Local\Programs\Python\Python311\python.exe
+                git:
+                    commit: 81b1265d95c2f1fbc19984ba073b83e171a406c3
+                    remote: https://github.com/8458076318/EY-Training.git
+                host: db2b020899305a9
+                memory:
+                    total: "8588832768"
+                os: Windows-10-10.0.19045-SP0
+                program: C:\Training\AI-ML-Training-Projects\date_15_06\colab2_groq_feedback_loop.py
+                python: CPython 3.11.9
+                root: C:\Training\AI-ML-Training-Projects\date_15_06
+                startedAt: "2026-06-15T10:09:03.788951Z"
+                writerId: rzq92y5h3l61zm30g5ir2wi0q6jcfws3
+        m: []
+        python_version: 3.11.9
+        t:
+            "3":
+                - 2
+                - 16
+            "4": 3.11.9
+            "5": 0.27.2
+            "8":
+                - 3
+            "12": 0.27.2
+            "13": windows-amd64
+model:
+    value: llama-3.3-70b-versatile
+version:
+    value: "2.0"

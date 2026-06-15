@@ -1,0 +1,162 @@
+# FinSight AI — LLM Eval Pipeline
+# Triggers on every PR to main; also runs nightly on schedule.
+#
+# Required GitHub Secret: GROQ_API_KEY
+# Add it at: Settings → Secrets and variables → Actions → New repository secret
+
+name: LLM Eval Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/llm-eval.yml'
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'   # Nightly full eval at 02:00 UTC
+  workflow_dispatch:       # Allow manual trigger from GitHub UI
+    inputs:
+      eval_mode:
+        description: 'Eval mode (smoke = 5 easy cases; full = all 20)'
+        required: false
+        default: 'smoke'
+        type: choice
+        options: [ smoke, full ]
+
+jobs:
+
+  # ─── Job 1: Unit tests (fast, no API calls) ────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install groq bert-score pandas matplotlib pytest -q
+
+      - name: Run unit tests
+        run: pytest tests/ -v --tb=short -m "not integration"
+
+  # ─── Job 2: LLM Eval Quality Gate (requires GROQ_API_KEY) ──────
+  llm-eval:
+    name: LLM Eval Quality Gate
+    runs-on: ubuntu-latest
+    needs: unit-tests       # Only run eval if unit tests pass
+    permissions:
+      contents: read
+      pull-requests: write  # Needed to post PR comment
+
+    env:
+      GROQ_API_KEY: \${{ secrets.GROQ_API_KEY }}
+      EVAL_MODE: \${{ github.event.inputs.eval_mode || (github.event_name == 'schedule' && 'full') || 'smoke' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install groq bert-score pandas matplotlib -q
+
+      - name: Run FinSight eval harness
+        id: run_eval
+        run: |
+          cd src
+          python run_ci_eval.py
+          echo "exit_code=$?" >> \$GITHUB_OUTPUT
+
+      - name: Upload eval artefacts
+        if: always()    # Upload even if gate fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: finsight-eval-results-\${{ github.run_number }}
+          path: results/
+          retention-days: 30
+
+      - name: Post results to PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const gate = JSON.parse(
+              fs.readFileSync('results/gate_outcome.json', 'utf8')
+            );
+            const icon   = gate.passed ? '✅' : '❌';
+            const status = gate.passed ? 'PASSED' : 'FAILED';
+            const body = [
+              '## ' + icon + ' FinSight LLM Eval — Quality Gate ' + status,
+              '',
+              '**' + gate.reason + '**',
+              '',
+              gate.best_model
+                ? '🏆 Recommended model: `' + gate.best_model + '`'
+                : '⚠️ No model met all production constraints.',
+              '',
+              '> Full results uploaded as [Actions artefacts](' +
+                'https://github.com/' + context.repo.owner + '/' +
+                context.repo.repo + '/actions/runs/' + context.runId + ').',
+            ].join('
+');
+            await github.rest.issues.createComment({
+              owner:    context.repo.owner,
+              repo:     context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail job if quality gate failed
+        if: steps.run_eval.outputs.exit_code != '0'
+        run: |
+          echo "Quality gate failed — see results/gate_outcome.json for details."
+          exit 1
+
+  # ─── Job 3: Nightly full eval (schedule only) ──────────────────
+  nightly-full-eval:
+    name: Nightly Full Eval (20 cases × 4 models)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    needs: unit-tests
+
+    env:
+      GROQ_API_KEY: \${{ secrets.GROQ_API_KEY }}
+      EVAL_MODE: full
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install groq bert-score pandas matplotlib -q
+
+      - name: Run full eval (all 20 cases × 4 Groq models)
+        run: |
+          EVAL_MODE=full python src/run_ci_eval.py
+
+      - name: Upload nightly artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: finsight-nightly-\${{ github.run_number }}
+          path: results/
+          retention-days: 90
