@@ -1,0 +1,28 @@
+{
+  "os": "Windows-10-10.0.19045-SP0",
+  "python": "CPython 3.11.9",
+  "startedAt": "2026-06-15T10:05:38.552171Z",
+  "program": "C:\\Training\\AI-ML-Training-Projects\\date_15_06\\colab2_groq_feedback_loop.py",
+  "codePath": "date_15_06\\colab2_groq_feedback_loop.py",
+  "codePathLocal": "colab2_groq_feedback_loop.py",
+  "git": {
+    "remote": "https://github.com/8458076318/EY-Training.git",
+    "commit": "81b1265d95c2f1fbc19984ba073b83e171a406c3"
+  },
+  "email": "padhankamala457@gmail.com",
+  "root": "C:\\Training\\AI-ML-Training-Projects\\date_15_06",
+  "host": "db2b020899305a9",
+  "executable": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "cpu_count": 4,
+  "cpu_count_logical": 4,
+  "disk": {
+    "/": {
+      "total": "136779730944",
+      "used": "75589865472"
+    }
+  },
+  "memory": {
+    "total": "8588832768"
+  },
+  "writerId": "os84zlazt2to1v9b1tlrnpb9xmpplfxg"
+}

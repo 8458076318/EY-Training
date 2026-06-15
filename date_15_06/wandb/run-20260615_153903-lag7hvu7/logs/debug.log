@@ -1,0 +1,24 @@
+2026-06-15 15:39:03,793 INFO    MainThread:12616 [wandb_setup.py:_flush():81] Current SDK version is 0.27.2
+2026-06-15 15:39:03,794 INFO    MainThread:12616 [wandb_setup.py:_flush():81] Configure stats pid to 12616
+2026-06-15 15:39:03,794 INFO    MainThread:12616 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-06-15 15:39:03,794 INFO    MainThread:12616 [wandb_init.py:setup_run_log_directory():723] Logging user logs to C:\Training\AI-ML-Training-Projects\date_15_06\wandb\run-20260615_153903-lag7hvu7\logs\debug.log
+2026-06-15 15:39:03,794 INFO    MainThread:12616 [wandb_init.py:setup_run_log_directory():724] Logging internal logs to C:\Training\AI-ML-Training-Projects\date_15_06\wandb\run-20260615_153903-lag7hvu7\logs\debug-internal.log
+2026-06-15 15:39:03,796 INFO    MainThread:12616 [wandb_init.py:init():766] calling init triggers
+2026-06-15 15:39:03,796 INFO    MainThread:12616 [wandb_init.py:init():771] wandb.init called with sweep_config: {}
+config: {'model': 'llama-3.3-70b-versatile', 'version': '2.0', '_wandb': {}}
+2026-06-15 15:39:03,796 INFO    MainThread:12616 [wandb_init.py:init():814] starting backend
+2026-06-15 15:39:03,796 INFO    MainThread:12616 [wandb_init.py:init():829] sending inform_init request
+2026-06-15 15:39:04,329 INFO    MainThread:12616 [wandb_init.py:init():834] backend started and connected
+2026-06-15 15:39:04,360 INFO    MainThread:12616 [wandb_init.py:init():904] updated telemetry
+2026-06-15 15:39:04,597 INFO    MainThread:12616 [wandb_init.py:init():927] communicating run to backend with 90.0 second timeout
+2026-06-15 15:39:05,158 INFO    MainThread:12616 [wandb_init.py:init():972] starting run threads in backend
+2026-06-15 15:39:05,461 INFO    MainThread:12616 [wandb_run.py:_console_start():2523] atexit reg
+2026-06-15 15:39:05,462 INFO    MainThread:12616 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-06-15 15:39:05,462 INFO    MainThread:12616 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-06-15 15:39:05,462 INFO    MainThread:12616 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-06-15 15:39:05,466 INFO    MainThread:12616 [wandb_init.py:init():1010] run started, returning control to user process
+2026-06-15 15:39:08,368 INFO    MainThread:12616 [wandb_run.py:_finish():2285] finishing run padhankamala457-self/finsight-prompt-eval-groq/lag7hvu7
+2026-06-15 15:39:08,368 INFO    MainThread:12616 [wandb_run.py:_atexit_cleanup():2490] got exitcode: 0
+2026-06-15 15:39:08,369 INFO    MainThread:12616 [wandb_run.py:_restore():2472] restore
+2026-06-15 15:39:08,369 INFO    MainThread:12616 [wandb_run.py:_restore():2478] restore done
+2026-06-15 15:39:21,704 INFO    MainThread:12616 [wandb_run.py:_footer_sync_info():3891] logging synced files
