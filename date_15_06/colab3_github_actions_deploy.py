@@ -77,7 +77,7 @@ GITHUB_USERNAME = load_project_env("GITHUB_USERNAME", "your-github-username")
 os.environ['GROQ_API_KEY'] = GROQ_API_KEY
 
 # ── Create local repo directory ───────────────────────────────────
-REPO_NAME = 'github_ci_cd'
+REPO_NAME = 'finsigthAI'
 REPO_DIR  = Path(__file__).resolve().parent / REPO_NAME
 
 def _remove_readonly(func, path, exc_info):
@@ -848,8 +848,8 @@ jobs:
       pull-requests: write  # Needed to post PR comment
 
     env:
-      GROQ_API_KEY: \${{ secrets.GROQ_API_KEY }}
-      EVAL_MODE: \${{ github.event.inputs.eval_mode || (github.event_name == 'schedule' && 'full') || 'smoke' }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      EVAL_MODE: ${{ github.event.inputs.eval_mode || (github.event_name == 'schedule' && 'full') || 'smoke' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -867,15 +867,14 @@ jobs:
       - name: Run FinSight eval harness
         id: run_eval
         run: |
-          cd src
-          python run_ci_eval.py
-          echo "exit_code=$?" >> \$GITHUB_OUTPUT
+          python src/run_ci_eval.py
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Upload eval artefacts
         if: always()    # Upload even if gate fails
         uses: actions/upload-artifact@v4
         with:
-          name: finsight-eval-results-\${{ github.run_number }}
+          name: finsight-eval-results-${{ github.run_number }}
           path: results/
           retention-days: 30
 
@@ -924,7 +923,7 @@ jobs:
     needs: unit-tests
 
     env:
-      GROQ_API_KEY: \${{ secrets.GROQ_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       EVAL_MODE: full
 
     steps:
@@ -946,7 +945,7 @@ jobs:
       - name: Upload nightly artefacts
         uses: actions/upload-artifact@v4
         with:
-          name: finsight-nightly-\${{ github.run_number }}
+          name: finsight-nightly-${{ github.run_number }}
           path: results/
           retention-days: 90
 """
@@ -1268,50 +1267,50 @@ else:
 # Here is a visual summary of the full pipeline.
 
 # %%
-print("""
-┌─────────────────────────────────────────────────────────────────┐
-│              FINSIGHT AI — GitHub Actions Eval Pipeline         │
-└─────────────────────────────────────────────────────────────────┘
+# print("""
+# ┌─────────────────────────────────────────────────────────────────┐
+# │              FINSIGHT AI — GitHub Actions Eval Pipeline         │
+# └─────────────────────────────────────────────────────────────────┘
 
-  Developer                  GitHub                  Groq API
-  ─────────                  ──────                  ────────
-  git push PR  ──────────►  PR opened
-                            Workflow triggers
-                                │
-                                ▼
-                    ┌──────────────────────┐
-                    │  Job 1: unit-tests   │  (no API calls, ~30s)
-                    │  pytest tests/       │
-                    └──────────┬───────────┘
-                               │ pass
-                               ▼
-                    ┌──────────────────────┐
-                    │  Job 2: llm-eval     │
-                    │                      │
-                    │  run_ci_eval.py      │
-                    │    └─ eval_harness   │──────► llama-3.3-70b
-                    │         (5 cases)    │──────► llama-3.1-8b
-                    │                      │  ◄──── outputs + metrics
-                    │  Quality probes:     │
-                    │  • hallucination < 1%│
-                    │  • BERTScore ≥ 0.88  │
-                    │  • latency p95 < 3s  │
-                    │  • cost < $0.02      │
-                    └──────────┬───────────┘
-                               │
-                    ┌──────────┴───────────┐
-                    │                      │
-                   pass                  fail
-                    │                      │
-                    ▼                      ▼
-             PR comment:            PR comment:
-             ✅ Gate PASSED          ❌ Gate FAILED
-             + artefacts            + reason + artefacts
-             + best model           PR blocked
+#   Developer                  GitHub                  Groq API
+#   ─────────                  ──────                  ────────
+#   git push PR  ──────────►  PR opened
+#                             Workflow triggers
+#                                 │
+#                                 ▼
+#                     ┌──────────────────────┐
+#                     │  Job 1: unit-tests   │  (no API calls, ~30s)
+#                     │  pytest tests/       │
+#                     └──────────┬───────────┘
+#                                │ pass
+#                                ▼
+#                     ┌──────────────────────┐
+#                     │  Job 2: llm-eval     │
+#                     │                      │
+#                     │  run_ci_eval.py      │
+#                     │    └─ eval_harness   │──────► llama-3.3-70b
+#                     │         (5 cases)    │──────► llama-3.1-8b
+#                     │                      │  ◄──── outputs + metrics
+#                     │  Quality probes:     │
+#                     │  • hallucination < 1%│
+#                     │  • BERTScore ≥ 0.88  │
+#                     │  • latency p95 < 3s  │
+#                     │  • cost < $0.02      │
+#                     └──────────┬───────────┘
+#                                │
+#                     ┌──────────┴───────────┐
+#                     │                      │
+#                    pass                  fail
+#                     │                      │
+#                     ▼                      ▼
+#              PR comment:            PR comment:
+#              ✅ Gate PASSED          ❌ Gate FAILED
+#              + artefacts            + reason + artefacts
+#              + best model           PR blocked
 
-  ── Schedule (02:00 UTC) ──────────────────────────────────────────
-  Nightly full eval: all 20 cases × 4 Groq models → 90-day artefacts
-""")
+#   ── Schedule (02:00 UTC) ──────────────────────────────────────────
+#   Nightly full eval: all 20 cases × 4 Groq models → 90-day artefacts
+# """)
 
 # %% [markdown]
 # ## Step 12 — Run Locally Before Pushing (Dry-Run Verification)
