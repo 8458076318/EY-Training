@@ -1,0 +1,28 @@
+Question
+
+A logistics company processes 10,000 customer support emails daily. They want to:
+
+(a) Automatically classify each email into a category,
+(b) Retrieve relevant policy documents to generate a draft reply, and
+(c) Escalate complex cases to a human agent via a ticketing API.
+
+Which framework(s) would you recommend and why? Outline a high-level architecture in 4–6 bullet points.
+
+
+---
+
+Answer
+
+Framework Chosen: LangChain/LangGraph + LlamaIndex
+
+Step 1: Ingest 10,000 daily customer emails through an email API or message queue like Kafka/Azure Service Bus.
+
+Step 2: Use LangChain/LangGraph to classify each email into categories like refund, shipment delay, damaged package, address change, or complaint.
+
+Step 3: Use LlamaIndex to retrieve relevant company policy documents from a vector database using RAG.
+
+Step 4: Pass the retrieved policy context to an LLM to generate a draft customer reply.
+
+Step 5: Use LangGraph workflow logic to check confidence score, complexity, or sensitive cases. If the case is complex, call the ticketing API and escalate it to a human agent.
+
+Justification: LlamaIndex is best for document indexing and retrieval, while LangChain/LangGraph is best for workflow orchestration, classification, tool calling, and API-based escalation. This makes the system scalable, automated, and suitable for high-volume customer support.
