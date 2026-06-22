@@ -90,9 +90,9 @@ if REPO_ENV_PATH:
 def _ensure_openai_key() -> None:
     if os.environ.get("OPENAI_API_KEY"):
         return
-    if os.isatty(0):
-        os.environ["OPENAI_API_KEY"] = getpass("Paste your OpenAI API key: ")
-        return
+    # if os.isatty(0):
+    #     os.environ["OPENAI_API_KEY"] = getpass("Paste your OpenAI API key: ")
+    #     return
     raise RuntimeError(
         "OPENAI_API_KEY is not set. Export it in the environment or run in an "
         "interactive terminal."
