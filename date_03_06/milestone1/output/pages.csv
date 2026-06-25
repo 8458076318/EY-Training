@@ -1,0 +1,4 @@
+page_no,word_count,first_50_chars
+1,114,-- Create schema  CREATE SCHEMA IF NOT EXISTS shop
+2,98,"order_id      SERIAL PRIMARY KEY,    customer_id  "
+3,144,10-Minute Coding Activity  Duration: 10 minutes (s

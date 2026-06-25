@@ -1,0 +1,78 @@
+# version: "3.9"
+
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    environment:
+      - LOKI_URL=http://loki:3100
+    depends_on: [redis, ollama, loki]
+    restart: unless-stopped
+    labels:
+      - "com.docker.compose.service=api"
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: streamlit_app/Dockerfile
+    ports: ["8501:8501"]
+    environment:
+      - API_BASE=http://api:8000
+    depends_on: [api]
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes:
+      - ./observability/dashboards/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports: ["3100:3100"]
+    volumes:
+      - ./observability/dashboards/loki.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - ./observability/dashboards/promtail.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    depends_on: [loki]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    ports: ["3000:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./observability/dashboards/grafana_datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./observability/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on: [prometheus, loki]
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  loki_data:
+  grafana_data:

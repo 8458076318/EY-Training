@@ -1,0 +1,187 @@
+LinkedIn Platform — Object Storage Analysis: S3 vs Azure Blob	*Confidential*
+
+**LinkedIn Platform**
+
+**Object Storage Design Analysis**
+
+*Amazon S3  vs  Azure Blob Storage*
+
+Prepared for: Cloud Architecture Review  |  June 2026
+
+# **1. Executive Summary**
+
+This document analyzes the suitability of Amazon S3 and Azure Blob Storage for LinkedIn's platform features. The analysis covers which platform features can leverage object storage, and evaluates both solutions across performance, cost, compliance, and integration dimensions.
+
+**Recommendation: **
+
+Azure Blob Storage is the recommended choice for LinkedIn's object storage needs, primarily due to its native Microsoft 365 and Active Directory integration, strong enterprise IAM ecosystem alignment, and competitive pricing for large-scale blob workloads. Amazon S3 remains a strong alternative, particularly where global CDN performance and event-driven pipelines are the top priority.
+
+# **2. LinkedIn Features Implementable via Object Storage**
+
+The following LinkedIn platform features can be implemented using object storage (either S3 or Azure Blob):
+
+## **2.1 Profile ****&**** Media Assets**
+
+- Profile pictures and banner images (JPEGs/PNGs, typically 100KB–2MB each)
+
+- Company logos and cover photos
+
+- Resume / CV file uploads (PDFs)
+
+- Portfolio documents and work samples
+
+- Profile video introductions (MP4s)
+
+## **2.2 Content ****&**** Feed Assets**
+
+- Post images and carousels
+
+- Native video uploads (MP4, MOV) — transcoded versions stored in multiple resolutions
+
+- Document posts (PDF slides, presentations shared in the feed)
+
+- Article cover images and rich media
+
+- Sponsored content creative assets (ads images and videos)
+
+## **2.3 Messaging ****&**** Collaboration**
+
+- File attachments sent in messages (PDFs, images, Office docs)
+
+- Voice messages and audio clips
+
+- Short video clips shared in DMs
+
+## **2.4 Learning ****&**** Courses (LinkedIn Learning)**
+
+- Course video files (primary source and processed HLS/DASH segments)
+
+- Subtitle and caption files (.vtt, .srt)
+
+- Course thumbnails and preview images
+
+- Downloadable exercise files and resources
+
+## **2.5 Jobs ****&**** Recruiter Platform**
+
+- Applicant-uploaded resumes and cover letters
+
+- Company-uploaded job description documents
+
+- Assessment files and skill evaluation assets
+
+## **2.6 Analytics ****&**** Data**
+
+- Exported analytics reports (CSV, XLSX)
+
+- Audit logs and platform event logs (append-only cold storage)
+
+- Data lake raw files (Parquet/Avro for big data pipelines)
+
+- A/B test result exports and campaign performance data
+
+## **2.7 Developer / API Platform**
+
+- OAuth token metadata caches
+
+- Webhook payload archives
+
+- API documentation static assets
+
+# **3. Amazon S3 vs Azure Blob Storage — Detailed Comparison**
+
+## **3.1 Side-by-Side Feature Comparison**
+
+| **Feature / Criterion** | **Amazon S3** | **Azure Blob Storage** |
+| --- | --- | --- |
+| **Storage Classes / Tiers** | S3 Standard, Intelligent-Tiering, Standard-IA, Glacier, Glacier Deep Archive | Hot, Cool, Cold, Archive tiers with Lifecycle Management policies |
+| **Auto-Tiering** | S3 Intelligent-Tiering automatically moves objects | Lifecycle Management rules (requires manual policy setup) |
+| **Global CDN** | CloudFront — largest global CDN footprint, 450+ PoPs | Azure CDN / Front Door — strong but fewer edge nodes in Africa & SE Asia |
+| **IAM ****&**** Identity** | AWS IAM — standalone, no native Active Directory | Azure Entra ID (AAD) — native SSO with Microsoft 365 |
+| **WORM / Immutability** | S3 Object Lock (time-based & legal hold) | Immutable Blob Storage with time-based retention policies |
+| **Event-Driven Triggers** | S3 Events → Lambda (low cold-start latency) | Azure Event Grid → Functions (slightly higher cold start) |
+| **Redundancy ****&**** Regions** | 99 regions + availability zones globally | 60+ regions; paired regions for geo-redundancy |
+| **Egress Costs** | High — $0.09/GB out to internet (US) | Lower — $0.087/GB, free egress within Azure services |
+| **GDPR / Data Residency** | Requires manual policy config; no sovereign cloud | EU Sovereign Cloud regions available natively |
+| **Encryption** | SSE-S3, SSE-KMS, SSE-C; client-side encryption | SSE with Microsoft-managed or customer-managed keys (CMK) |
+| **SLA (Availability)** | 99.99% for Standard | 99.9% for Blob, 99.99% for RA-GRS read access |
+| **Max Object Size** | 5TB per object | 4.75 TB per block blob |
+| **Pricing Model (Storage)** | From $0.023/GB/month (Standard) | From $0.018/GB/month (Hot tier, LRS) |
+| **Enterprise Support** | AWS Enterprise Support plans | Microsoft Unified Support — aligns with M365 contracts |
+
+# **4. Strengths ****&**** Weaknesses**
+
+| **Amazon S3** **STRENGTHS** **✓  **Largest global CDN footprint — fast media delivery worldwide **✓  **S3 Intelligent-Tiering auto-reduces costs for cold objects **✓  **Event-driven Lambda triggers — ideal for media processing pipelines **✓  **99 regions and AZs — redundancy for global scale **✓  **S3 Object Lock (WORM) for tamper-proof retention **✓  **Mature ecosystem with extensive third-party tooling **WEAKNESSES** **✗  **GDPR data residency requires careful explicit configuration **✗  **Egress costs are notoriously high at scale **✗  **No native Active Directory/Entra integration **✗  **Lambda cold starts can add latency to media pipelines | **Azure Blob Storage** **STRENGTHS** **✓  **Native Entra ID SSO and IAM — no separate identity stack **✓  **EU Sovereign Cloud regions for GDPR data residency out of the box **✓  **Blob Lifecycle Management for auto-archiving to Cool/Archive tiers **✓  **Immutable Blob Storage (WORM) for compliance retention **✓  **Azure Event Grid + Functions integrates cleanly with media pipelines **✓  **Lower storage pricing (Hot tier) vs S3 Standard **✓  **Native integration with Microsoft 365 ecosystem **WEAKNESSES** **✗  **Smaller edge CDN coverage than S3 in Africa and SE Asia **✗  **Archive tier retrieval can take hours — slow for ad-hoc audit requests **✗  **Azure Functions cold start latency slightly higher than Lambda |
+| --- | --- |
+
+# **5. Recommendation ****&**** Rationale**
+
+## **5.1 Recommended Choice: Azure Blob Storage**
+
+For LinkedIn's use case — a global professional network with a large enterprise user base heavily on Microsoft 365 — Azure Blob Storage is the recommended object storage solution. The key rationale is as follows:
+
+- **Identity ****&**** IAM alignment: **LinkedIn's enterprise users and internal engineering teams are predominantly on Microsoft Entra ID. Azure Blob's native integration eliminates a separate IAM layer and reduces authentication complexity.
+
+- **GDPR compliance out-of-the-box: **Azure's dedicated EU sovereign cloud regions simplify regulatory compliance for LinkedIn's European users, with no additional configuration required.
+
+- **Cost efficiency at scale: **Azure Blob Hot tier pricing ($0.018/GB) is lower than S3 Standard ($0.023/GB), and Azure's lower egress costs provide significant savings for LinkedIn's high read-traffic workloads (feeds, media).
+
+- **Immutable storage for compliance: **Immutable Blob Storage with time-based retention policies meets audit and legal hold requirements without additional tooling.
+
+- **Enterprise support alignment: **LinkedIn's existing Microsoft enterprise agreements can be extended to cover Azure, consolidating billing and support channels.
+
+## **5.2 When to Consider Amazon S3 Instead**
+
+- If CDN performance in Africa or Southeast Asia is a top priority
+
+- If the engineering team is heavily AWS-native with existing Lambda pipelines
+
+- If multi-cloud egress cost trade-offs favor S3 for specific workloads
+
+- If tighter Lambda cold-start performance is critical for real-time media processing
+
+# **6. Recommended Architecture (Azure Blob)**
+
+## **6.1 Storage Account Structure**
+
+- Separate storage accounts per workload domain: profile-media, feed-content, learning-videos, jobs-docs, audit-logs
+
+- Geo-redundant storage (GRS) for profile and feed assets; LRS for ephemeral upload staging
+
+- EU-West data residency account for all GDPR-scoped user data
+
+## **6.2 Tiering Strategy**
+
+- Hot tier: Profile pictures, feed media, course thumbnails (active reads)
+
+- Cool tier: Older post attachments, completed job application files (30+ days)
+
+- Archive tier: Audit logs, old course recordings, inactive account assets (90+ days)
+
+## **6.3 Processing Pipeline**
+
+- Upload → Azure Blob trigger → Event Grid → Azure Functions
+
+- Image/video processing function: resize, transcode, generate CDN URLs
+
+- Metadata written to Cosmos DB or Azure SQL; blob URL stored as reference
+
+## **6.4 Security ****&**** Compliance**
+
+- Customer-managed keys (CMK) via Azure Key Vault for all sensitive containers
+
+- Immutable Blob Storage with 7-year retention for audit logs
+
+- Private endpoints + VNet service endpoints; no public blob access
+
+- Microsoft Defender for Storage enabled for threat detection
+
+# **7. Conclusion**
+
+Both Amazon S3 and Azure Blob Storage are production-grade, enterprise-ready object storage platforms capable of supporting LinkedIn's scale. The choice ultimately hinges on ecosystem alignment, compliance needs, and cost optimization.
+
+For LinkedIn, Azure Blob Storage offers a compelling advantage through its deep Microsoft 365 integration, native EU sovereign cloud regions for GDPR compliance, and competitive pricing at scale. It is the recommended solution for the majority of LinkedIn's object storage workloads. Amazon S3 should be considered for specific edge delivery or multi-cloud scenarios where its CDN footprint or AWS-native tooling provides a clear advantage.
+
+*Document prepared for internal architecture review. All pricing referenced as of June 2026 and subject to change.*
+
+	Page N*	LinkedIn Object Storage Design — June 2026*

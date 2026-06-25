@@ -1,0 +1,90 @@
+AZURE ROUTING DECISIONS — LOAD BALANCER vs APP GATEWAY
+========================================================
+
+
+1. PATIENT WEB PORTAL → APP GATEWAY
+-------------------------------------
+This is the textbook App Gateway case. The app serves 400,000 requests/hour from
+public browsers, so it's exposed to the internet — meaning WAF protection against
+OWASP Top 10 attacks (SQL injection, XSS) is non-negotiable. Beyond that, the team
+needs URL-based routing: /api/* must go to one backend VM pool, while /static/* must
+go to Azure Blob Storage. A Load Balancer operates at Layer 4 and is completely blind
+to URL paths — it only sees IP addresses and ports, not the HTTP path in the request.
+App Gateway reads the full HTTP request, inspects the path, applies WAF rules,
+terminates SSL at the entry point, and routes accordingly. The Load Balancer simply
+cannot do any of this.
+
+
+2. CLINICAL API (INTERNAL) → LOAD BALANCER
+--------------------------------------------
+This is the opposite case. The traffic never leaves the Azure VNet — hospital EHR
+systems inside the network call the API directly over TCP port 8443. Azure Application
+Gateway is designed for public-facing workloads; it requires a public-facing frontend.
+More importantly, the team needs sub-millisecond distribution with no overhead. App
+Gateway parses every HTTP request (reads headers, applies rules, potentially modifies
+the request) — that processing adds latency. The Load Balancer just forwards TCP
+packets at wire speed with no inspection. Since no WAF, URL routing, or HTTP awareness
+is needed, App Gateway would be overkill and slower.
+
+
+3. DICOM IMAGE STREAMING → LOAD BALANCER
+------------------------------------------
+The protocol itself makes this decision. DICOM is raw TCP — it is not HTTP. App
+Gateway is an HTTP/HTTPS reverse proxy; it fundamentally cannot proxy raw TCP streams.
+Beyond the protocol issue, DICOM sessions are long-lived (minutes per transfer) and
+must be pinned to the same backend VM for the entire transfer — if the session hops to
+a different VM mid-transfer, state is lost and the transfer fails. The Load Balancer
+supports source-IP-based session persistence natively at Layer 4. No content
+inspection is needed, no header reading, no URL routing — just "keep this TCP
+connection going to the same VM until it closes."
+
+
+4. AUTH SERVICE (HEADER ROUTING) → APP GATEWAY
+-------------------------------------------------
+The key word here is "inspect." The system must read the X-Trust-ID HTTP header on
+every login request and route to the correct trust-specific backend pool (e.g.
+Trust-ID: NWE1 → North West pool). A Load Balancer operates at Layer 4 and cannot
+read HTTP headers — it has no idea what's in the payload. App Gateway is an HTTP
+proxy that reads every header before deciding where to forward. Additionally, each
+backend pool runs its own SAML federation configuration and requires end-to-end TLS
+(the traffic must be re-encrypted after App Gateway terminates the inbound SSL). App
+Gateway supports this with backend HTTPS settings; Load Balancer offers no SSL
+awareness at all.
+
+
+5. LEGACY SOAP LAB SERVICE → LOAD BALANCER
+--------------------------------------------
+Two critical constraints here. First, the vendor contract explicitly forbids any
+modification to payloads or headers — and App Gateway, being an HTTP reverse proxy,
+inherently modifies requests (it rewrites Host headers, can add X-Forwarded-For,
+etc.). Using App Gateway would technically violate the vendor contract. Second, the
+only actual requirement is failover: if VM1 goes down, send traffic to VM2. That is
+exactly what a Load Balancer's health probes and failover rules do, with zero
+configuration overhead. App Gateway would add unnecessary cost and complexity for a
+goal that needs nothing more than basic TCP redundancy.
+
+
+6. ADMIN DASHBOARD (HOSTNAME ROUTING) → APP GATEWAY
+------------------------------------------------------
+Two different subdomains (admin.healthbridge.nhs.uk and www.healthbridge.nhs.uk)
+share a single public IP address. The App Gateway receives incoming HTTPS requests
+and uses SNI (Server Name Indication) — which is part of the TLS handshake, a Layer 7
+feature — to read the hostname and route to the appropriate backend pool. A Load
+Balancer only sees the destination IP address (which is the same for both subdomains)
+and has no way to distinguish between the two hostnames. Additionally, App Gateway
+supports autoscaling rules tied to backend metrics (like CPU), which the admin pool
+requires. All of this is purely Layer 7 functionality.
+
+
+========================================================
+SUMMARY TABLE
+
+  #  Requirement              Decision          Key Reason
+  -  -----------              --------          ----------
+  1  Patient web portal       App Gateway       WAF + URL path routing + SSL termination
+  2  Clinical API             Load Balancer     Internal VNet only, no HTTP awareness needed
+  3  DICOM image streaming    Load Balancer     Raw TCP (non-HTTP), session persistence
+  4  Auth service             App Gateway       HTTP header inspection + end-to-end TLS
+  5  Legacy SOAP service      Load Balancer     No payload/header modification allowed
+  6  Admin dashboard          App Gateway       Hostname-based routing (SNI) + autoscale
+========================================================

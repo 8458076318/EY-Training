@@ -1,0 +1,18 @@
+{
+  "input_csv": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\data\\raw\\sakshi_ppg_20260611T074737_len148s.csv",
+  "output_root": "C:\\Training\\AI-ML-Training-Projects\\date_11_06",
+  "artifacts": {
+    "time_series_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\03_series_plots\\time_series.png",
+    "superimposed_red_ir": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\03_series_plots\\red_ir_superimposed.png",
+    "normalized_red_ir_peaks": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\03_series_plots\\red_ir_normalized_peaks.png",
+    "decomposition_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\04_decomposition\\ir_corrected_decomposition.png",
+    "weekly_boxplot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\05_boxplots\\weekly_boxplot.png",
+    "monthly_boxplot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\05_boxplots\\monthly_boxplot.png",
+    "stationarity_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\06_stationarity\\rolling_stationarity.png",
+    "acf_pacf_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\07_acf_pacf\\acf_pacf.png",
+    "outlier_red_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\04_decomposition\\red_corrected_outliers.png",
+    "outlier_ir_plot": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\artifacts\\04_decomposition\\ir_corrected_outliers.png"
+  },
+  "report": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\reports\\ppg_eda_report.md",
+  "feature_dataset": "C:\\Training\\AI-ML-Training-Projects\\date_11_06\\data\\processed\\ppg_engineered_dataset.csv"
+}
