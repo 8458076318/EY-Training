@@ -1,0 +1,98 @@
+{
+  "title": "Multi-Agent Day Planner",
+  "uid": "multi-agent-v1",
+  "schemaVersion": 38,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Agent calls per minute",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "rate(agent_calls_total[1m])",
+          "legendFormat": "{{agent}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Agent latency p95 (s)",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(agent_latency_seconds_bucket[5m]))",
+          "legendFormat": "p95 {{agent}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "SMS reminders sent",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(reminders_sent_total)"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "API requests/min",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 6,
+        "y": 8,
+        "w": 18,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "rate(api_requests_total[1m])",
+          "legendFormat": "{{method}} {{endpoint}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Application Logs (Loki)",
+      "type": "logs",
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "expr": "{app=\"multi-agent-planner\"}"
+        }
+      ]
+    }
+  ]
+}

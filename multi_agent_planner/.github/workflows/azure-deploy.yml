@@ -1,0 +1,42 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run unit tests
+        run: |
+          pip install -r requirements.txt
+          pytest tests/unit -v --tb=short
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep infrastructure
+        uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: multi-agent-planner-rg
+          template: azure/main.bicep
+          parameters: >
+            environment=prod
+            openaiApiKey=${{ secrets.OPENAI_API_KEY }}
+            groqApiKey=${{ secrets.GROQ_API_KEY }}
+
+      - name: Build and push API image
+        run: |
+          ACR=$(az deployment group show -g multi-agent-planner-rg -n main \
+            --query "properties.outputs.acrServer.value" -o tsv)
+          az acr build --registry $ACR --image multi-agent-planner:${{ github.sha }} -f Dockerfile .
+          az acr build --registry $ACR --image multi-agent-planner-ui:${{ github.sha }} -f streamlit_app/Dockerfile .
