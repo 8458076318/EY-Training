@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 date_10_06/data/cifar-10-python.tar.gz
+date_22_06/my-app/autogen*.db
+C:\Training\AI-ML-Training-Projects\capstone\.env.example
