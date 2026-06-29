@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: dayplanner_test
+          POSTGRES_USER: planner_user
+          POSTGRES_PASSWORD: test_password
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install poetry && poetry install
+      - run: poetry run ruff check src/ frontend/
+      - run: poetry run mypy src/
+      - run: poetry run pytest tests/ -v --cov=src --cov-report=xml
+        env:
+          DATABASE_URL: postgresql+asyncpg://planner_user:test_password@localhost:5432/dayplanner_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+          JWT_SECRET: test-jwt-secret
+          POSTGRES_PASSWORD: test_password
+      - uses: codecov/codecov-action@v4
+
+  build-and-push:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: az acr login --name ${{ secrets.ACR_NAME }}
+      - run: |
+          docker build -f infra/docker/Dockerfile.api -t ${{ secrets.ACR_NAME }}.azurecr.io/day-planner-api:${{ github.sha }} .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/day-planner-api:${{ github.sha }}
+
+  deploy-prod:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/aks-set-context@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cluster-name: day-planner-aks
+          resource-group: day-planner-rg
+      - run: kubectl apply -k infra/k8s/overlays/prod
+      - run: kubectl rollout status deployment/day-planner-api -n day-planner

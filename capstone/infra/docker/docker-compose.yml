@@ -1,0 +1,71 @@
+# version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dayplanner
+      POSTGRES_USER: planner_user
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planner_user -d dayplanner"]
+      interval: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes: [ollama_data:/root/.ollama]
+    ports: ["11434:11434"]
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    env_file: ../../.env
+    ports: ["8000:8000"]
+    depends_on: {postgres: {condition: service_healthy}, redis: {condition: service_started}}
+    volumes: [../../data:/app/data]
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.frontend
+    ports: ["8501:8501"]
+    depends_on: [api]
+    environment:
+      API_BASE: http://api:8000/api/v1
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.worker
+    env_file: ../../.env
+    depends_on: [redis, api]
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes: [../../config/prometheus.yml:/etc/prometheus/prometheus.yml]
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports: ["3000:3000"]
+    volumes: [grafana_data:/var/lib/grafana]
+
+  loki:
+    image: grafana/loki:latest
+    ports: ["3100:3100"]
+
+volumes:
+  pg_data:
+  ollama_data:
+  grafana_data:
