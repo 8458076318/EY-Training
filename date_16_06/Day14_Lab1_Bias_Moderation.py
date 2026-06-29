@@ -45,7 +45,7 @@ import sys
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-print("All packages installed")
+# print("All packages installed")
 
 import pandas as pd
 import numpy as np
@@ -823,11 +823,12 @@ for prompt in test_prompts[:4]:
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 
-def load_project_env() -> bool:
+def load_project_env(overwrite: set[str] | None = None) -> bool:
     """
     Minimal .env loader so the script can pick up OPENAI_API_KEY without a
     hard dependency on python-dotenv.
     """
+    overwrite = overwrite or set()
     repo_root = Path(__file__).resolve().parent.parent
     env_path = repo_root / ".env"
     if not env_path.exists():
@@ -841,13 +842,13 @@ def load_project_env() -> bool:
         key, value = line.split("=", 1)
         key = key.strip()
         value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
+        if key and (key not in os.environ or key in overwrite):
             os.environ[key] = value
             loaded = True
     return loaded
 
 
-load_project_env()
+load_project_env(overwrite={"OPENAI_API_KEY"})
 
 try:
     from openai import OpenAI
@@ -863,7 +864,7 @@ OPENAI_LIVE_ERROR_REPORTED = False
 OPENAI_STATUS_NOTE = "OpenAI API not initialized."
 if OpenAI is not None and os.getenv("OPENAI_API_KEY"):
     try:
-        openai_client = OpenAI()
+        openai_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
         OPENAI_STATUS_NOTE = "OPENAI_API_KEY loaded from repo .env."
     except Exception as exc:
         OPENAI_STATUS_NOTE = f"OpenAI client init failed: {exc}"

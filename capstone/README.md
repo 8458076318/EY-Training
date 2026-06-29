@@ -30,7 +30,7 @@ If `docker-compose` fails with a named-pipe or API-version error on Windows:
 ## Project Layout
 ```
 src/         FastAPI app + agents + services
-frontend/    Streamlit UI
+ui/          Streamlit UI
 infra/       Docker, K8s, Helm charts
 tests/       unit / integration / e2e
 scripts/     DB seed, deploy helpers

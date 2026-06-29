@@ -1,7 +1,7 @@
 """Signup page with full health profile collection."""
 import streamlit as st
 import httpx
-from frontend.utils.api import API_BASE
+from ui.utils.api import API_BASE
 
 
 def render():

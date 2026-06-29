@@ -1,0 +1,13 @@
+SITUATION: 
+A severe port congestion has occurred at the Rotterdam EU Hub, resulting in a container backlog of 3 days. The disruption is classified as high severity, with an impact score of 8/10. The congestion has affected multiple shipping lanes, including the Asia-Europe shipping lane, with delays of up to 5 days expected in transshipments from Singapore and a 7-day increase in ocean freight rates due to rerouting via the Suez Canal.
+
+IMPACT: 
+The disruption has significant operational and financial implications, with 15,000 TEU currently stuck in Rotterdam and 30,000 TEU expected arrival delays in Singapore, Houston, and other EU ports. The estimated EUR cost exposure is substantial, with additional costs associated with rerouting, delayed shipments, and potential losses due to spoiled or damaged cargo.
+
+RESPONSE: 
+To mitigate the impact of the disruption, we have identified three alternative routes for affected shipments. The recommended route, Alternative EU Port Routing (AEUR1), involves rerouting via Antwerp and Bremerhaven to avoid Rotterdam congestion. This route is calculated to reduce the total delay by 20 hours and maintain a lower risk score of 2, with an estimated additional cost of 12.5% compared to our standard route. Suppliers, including Rotterdam Container Terminal, Ocean Freight Carrier - APAC, and Houston Terminal Operator - US, have been notified and are collaborating to expedite resolution and recovery. The compliance status for the recommended route has been reviewed, and all necessary customs requirements have been met, with no non-compliance issues identified.
+
+NEXT STEPS: 
+1. **Supplier Notification and Collaboration** - The logistics team, led by John Doe, will confirm supplier capabilities to support the expedited rerouting plan within the next 4 hours (Deadline: 16:00 GMT, Today).
+2. **Rerouting Plan Execution** - The operations team, led by Jane Smith, will execute the rerouting plan for the 50 highest-priority shipments, with a focus on minimizing delays and additional costs (Deadline: 08:00 GMT, Tomorrow).
+3. **Continuous Monitoring and Review** - The executive team, led by Michael Johnson, will closely monitor the situation and review the effectiveness of the response plan, making adjustments as necessary to ensure the continuity of cargo delivery (Deadline: 12:00 GMT, Day After Tomorrow).

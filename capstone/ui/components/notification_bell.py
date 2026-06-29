@@ -2,7 +2,7 @@
 import time
 import streamlit as st
 import httpx
-from frontend.utils.api import API_BASE, get_auth_headers
+from ui.utils.api import API_BASE, get_auth_headers
 
 
 def render_notification_bell():

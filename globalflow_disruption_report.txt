@@ -1,0 +1,9 @@
+SITUATION: Port of Rotterdam is closed due to severe storm surge.
+IMPACT: 340 containers affected; SLA breach window opens within 6 hours.
+RESPONSE: Use Felixstowe and Hamburg as backup routes, notify suppliers, and keep compliance checks active.
+NEXT STEPS:
+1. Ops to confirm reroutes within 1 hour.
+2. Comms to send supplier notices within 2 hours.
+3. Compliance to approve transit path before shipment release.
+
+Fallback executed after CrewAI kickoff failed.

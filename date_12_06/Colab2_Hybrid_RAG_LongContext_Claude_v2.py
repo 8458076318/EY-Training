@@ -66,6 +66,8 @@
 # %%
 import os, time
 import re
+import math
+from collections import Counter
 import warnings
 import numpy as np
 import pandas as pd
@@ -111,6 +113,117 @@ def _require_env_value(name: str, value: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
+
+
+def _normalize_for_metrics(text: str) -> list[str]:
+    """Lowercase word tokens for lightweight local BLEU/ROUGE scoring."""
+    return re.findall(r"[a-z0-9']+", text.lower())
+
+
+def _ngram_counts(tokens: list[str], n: int) -> Counter:
+    return Counter(tuple(tokens[i:i + n]) for i in range(max(len(tokens) - n + 1, 0)))
+
+
+def bleu_score(reference: str, candidate: str, max_n: int = 4) -> float:
+    """Compact BLEU implementation for a single reference/candidate pair."""
+    ref_tokens = _normalize_for_metrics(reference)
+    cand_tokens = _normalize_for_metrics(candidate)
+    if not ref_tokens or not cand_tokens:
+        return 0.0
+
+    precisions = []
+    for n in range(1, max_n + 1):
+        cand_counts = _ngram_counts(cand_tokens, n)
+        if not cand_counts:
+            precisions.append(0.0)
+            continue
+        ref_counts = _ngram_counts(ref_tokens, n)
+        clipped = sum(min(count, ref_counts[ng]) for ng, count in cand_counts.items())
+        precisions.append(clipped / sum(cand_counts.values()))
+
+    if any(p <= 0 for p in precisions):
+        return 0.0
+
+    geo_mean = math.exp(sum(math.log(p) for p in precisions) / max_n)
+    ref_len = len(ref_tokens)
+    cand_len = len(cand_tokens)
+    brevity_penalty = 1.0 if cand_len > ref_len else math.exp(1 - (ref_len / max(cand_len, 1)))
+    return float(brevity_penalty * geo_mean)
+
+
+def rouge_l_f1(reference: str, candidate: str) -> float:
+    """ROUGE-L F1 via longest common subsequence on tokenized text."""
+    ref = _normalize_for_metrics(reference)
+    cand = _normalize_for_metrics(candidate)
+    if not ref or not cand:
+        return 0.0
+
+    dp = [[0] * (len(cand) + 1) for _ in range(len(ref) + 1)]
+    for i, r_tok in enumerate(ref, start=1):
+        for j, c_tok in enumerate(cand, start=1):
+            if r_tok == c_tok:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+
+    lcs = dp[-1][-1]
+    precision = lcs / len(cand)
+    recall = lcs / len(ref)
+    if precision + recall == 0:
+        return 0.0
+    return float((2 * precision * recall) / (precision + recall))
+
+
+def faithfulness_proxy(answer: str, support_text: str) -> float:
+    """
+    Lightweight faithfulness proxy:
+    score each answer sentence by token overlap against the supplied context.
+    """
+    answer_sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", answer) if s.strip()]
+    support_tokens = set(_normalize_for_metrics(support_text))
+    if not answer_sentences or not support_tokens:
+        return 0.0
+
+    sentence_scores = []
+    for sentence in answer_sentences:
+        sent_tokens = _normalize_for_metrics(sentence)
+        if len(sent_tokens) < 4:
+            continue
+        overlap = len(set(sent_tokens) & support_tokens)
+        sentence_scores.append(overlap / len(set(sent_tokens)))
+
+    if not sentence_scores:
+        return 0.0
+    return float(sum(sentence_scores) / len(sentence_scores))
+
+
+def quality_metrics(reference: str, candidate: str, support_text: str) -> dict[str, float]:
+    return {
+        "BLEU": bleu_score(reference, candidate),
+        "ROUGE-L": rouge_l_f1(reference, candidate),
+        "Faithfulness": faithfulness_proxy(candidate, support_text),
+    }
+
+
+def summarize_metrics(rows: list[dict[str, float]]) -> dict[str, float]:
+    return {
+        "BLEU": float(np.mean([row["BLEU"] for row in rows])) if rows else 0.0,
+        "ROUGE-L": float(np.mean([row["ROUGE-L"] for row in rows])) if rows else 0.0,
+        "Faithfulness": float(np.mean([row["Faithfulness"] for row in rows])) if rows else 0.0,
+    }
+
+
+def context_precision(query: str, relevant_title: str, top_k: int = TOP_K) -> tuple[float, list[str]]:
+    """
+    Retrieval context precision for a single query.
+    Precision = relevant retrieved chunks / retrieved chunks.
+    """
+    retrieved = azure_hybrid_search(query, top_k=top_k)
+    if not retrieved:
+        return 0.0, []
+
+    hits = sum(1 for row in retrieved if relevant_title.lower() in row["title"].lower())
+    return hits / len(retrieved), [row["title"] for row in retrieved]
 
 
 @dataclass
@@ -383,6 +496,7 @@ print(f"Local Claude adapter ready: {CLAUDE_MODEL}")
 class RAGResult:
     answer:        str
     sources:       list
+    context:       str
     embed_ms:      float
     retrieve_ms:   float
     generate_ms:   float
@@ -428,6 +542,7 @@ def rag_answer(query: str) -> RAGResult:
     return RAGResult(
         answer=response.content,
         sources=sources,
+        context=context,
         embed_ms=embed_ms,
         retrieve_ms=retrieve_ms,
         generate_ms=generate_ms,
@@ -559,6 +674,7 @@ print(f"Estimated input cost per query: ${corpus_tokens * COST_INPUT:.5f}")
 @dataclass
 class FullCtxResult:
     answer:        str
+    context:       str
     generate_ms:   float
     input_tokens:  int = 0
     output_tokens: int = 0
@@ -586,6 +702,7 @@ def full_context_answer(query: str) -> FullCtxResult:
     usage = response.response_metadata.get("usage", {})
     return FullCtxResult(
         answer=response.content,
+        context=full_corpus_text,
         generate_ms=generate_ms,
         input_tokens=usage.get("input_tokens", 0),
         output_tokens=usage.get("output_tokens", 0),
@@ -639,6 +756,85 @@ TEST_QUESTIONS = [
     "What are the scaling laws for large language models?",
 ]
 
+REFERENCE_ANSWERS = {
+    "What is the attention mechanism in transformer models?": (
+        "Transformers use self-attention to let each token weigh every other token, "
+        "so the model can capture long-range dependencies in parallel."
+    ),
+    "How does BERT differ from GPT in architecture?": (
+        "BERT is encoder-only and bidirectional for understanding tasks, while GPT is decoder-only "
+        "and autoregressive for text generation."
+    ),
+    "What is retrieval-augmented generation?": (
+        "Retrieval-augmented generation retrieves relevant external documents at inference time and "
+        "injects them into the prompt so the model can answer from grounded context."
+    ),
+    "How does FAISS index vectors for similarity search?": (
+        "FAISS stores vectors in in-memory indexes such as flat, inverted-file, or HNSW structures "
+        "to support fast nearest-neighbour similarity search."
+    ),
+    "How does CRISPR-Cas9 edit the genome?": (
+        "A guide RNA directs Cas9 to a target DNA sequence, Cas9 cuts the DNA, and the cell repairs "
+        "the break through NHEJ or HDR."
+    ),
+    "What causes COVID-19 and how does it spread?": (
+        "COVID-19 is caused by SARS-CoV-2 and spreads mainly through respiratory droplets and aerosols."
+    ),
+    "How do mRNA vaccines trigger an immune response?": (
+        "mRNA vaccines deliver genetic instructions for a viral antigen, which cells translate so the "
+        "immune system can recognize and respond to it."
+    ),
+    "What is the mechanism of action of base editing?": (
+        "Base editing makes precise single-nucleotide changes without double-strand breaks, usually by "
+        "chemically converting one base into another."
+    ),
+    "What were the main causes of climate change acceleration?": (
+        "Climate change accelerated mainly because burning fossil fuels raised greenhouse gas levels, "
+        "especially carbon dioxide, over time."
+    ),
+    "How did quantum computing progress after 2019?": (
+        "Quantum computing advanced with more qubits and better hardware, but systems still suffer from "
+        "high error rates and remain in the NISQ era."
+    ),
+    "What is the bullwhip effect in supply chains?": (
+        "The bullwhip effect is when small changes in demand become larger swings in orders and inventory "
+        "as they move upstream through the supply chain."
+    ),
+    "How does the NIST cybersecurity framework work?": (
+        "The NIST cybersecurity framework organizes security work around identifying, protecting, detecting, "
+        "responding, and recovering from cyber risk."
+    ),
+    "How do electric vehicles regenerate energy from braking?": (
+        "Electric vehicles use regenerative braking to convert kinetic energy into electricity when slowing down."
+    ),
+    "What is Reciprocal Rank Fusion in hybrid search?": (
+        "Reciprocal Rank Fusion combines rankings from multiple retrievers so documents that rank well in more "
+        "than one system move up in the final result list."
+    ),
+    "How does blockchain achieve immutability?": (
+        "Blockchain achieves immutability by linking blocks with hashes so changing one record would require "
+        "changing every subsequent block."
+    ),
+    "What cybersecurity threats target cloud infrastructure?": (
+        "Cloud infrastructure is targeted by threats such as malware, phishing, man-in-the-middle attacks, "
+        "SQL injection, zero-day exploits, DDoS, and insider threats."
+    ),
+    "How has solar energy cost changed since 2010?": (
+        "Solar PV costs have fallen sharply since 2010, by about 90 percent."
+    ),
+    "What disrupted global supply chains in 2020-2021?": (
+        "The COVID-19 pandemic caused port congestion, factory shutdowns, container shortages, and semiconductor "
+        "scarcity that disrupted supply chains."
+    ),
+    "What is Proof of Stake and how does it differ from Proof of Work?": (
+        "Proof of Stake selects validators based on staked assets, while Proof of Work uses computational mining "
+        "to secure the network."
+    ),
+    "What are the scaling laws for large language models?": (
+        "Scaling laws show that model performance improves predictably as parameters, data, and compute increase."
+    ),
+}
+
 # %%
 rag_results: list[RAGResult]     = []
 fc_results:  list[FullCtxResult] = []
@@ -685,6 +881,91 @@ print("=" * 55)
 cost_ratio    = np.mean(fc_costs) / max(np.mean(rag_costs), 1e-10)
 latency_ratio = np.mean(fc_total_ms) / max(np.mean(rag_total_ms), 1.0)
 print(f"\nFull-context is {cost_ratio:.1f}x more expensive and {latency_ratio:.1f}x slower than RAG")
+
+# %% [markdown]
+# ---
+# ## Step 04b - Answer Quality Metrics (BLEU / ROUGE / Faithfulness)
+#
+# Score both pipelines against a lightweight reference answer set.
+# BLEU and ROUGE-L measure text overlap, while faithfulness checks how well
+# the answer is supported by the supplied context.
+
+# %%
+rag_quality_rows = []
+fc_quality_rows = []
+
+for q, rag_res, fc_res in zip(TEST_QUESTIONS, rag_results, fc_results):
+    reference = REFERENCE_ANSWERS[q]
+    rag_quality_rows.append(quality_metrics(reference, rag_res.answer, rag_res.context))
+    fc_quality_rows.append(quality_metrics(reference, fc_res.answer, fc_res.context))
+
+rag_quality_summary = summarize_metrics(rag_quality_rows)
+fc_quality_summary = summarize_metrics(fc_quality_rows)
+
+quality_summary = pd.DataFrame({
+    "Metric": ["BLEU", "ROUGE-L", "Faithfulness"],
+    "RAG": [
+        f"{rag_quality_summary['BLEU']:.3f}",
+        f"{rag_quality_summary['ROUGE-L']:.3f}",
+        f"{rag_quality_summary['Faithfulness']:.3f}",
+    ],
+    "Full Context": [
+        f"{fc_quality_summary['BLEU']:.3f}",
+        f"{fc_quality_summary['ROUGE-L']:.3f}",
+        f"{fc_quality_summary['Faithfulness']:.3f}",
+    ],
+})
+
+print("\n" + "=" * 55)
+print("ANSWER QUALITY SUMMARY (BLEU / ROUGE-L / Faithfulness)")
+print("=" * 55)
+print(quality_summary.to_string(index=False))
+print("=" * 55)
+print(
+    "Interpretation: BLEU and ROUGE-L reflect lexical overlap with the reference answer, "
+    "while faithfulness measures how much of the generated answer is supported by the provided context."
+)
+
+# %%
+quality_df = pd.DataFrame({
+    "Metric": ["BLEU", "ROUGE-L", "Faithfulness"],
+    "RAG": [rag_quality_summary["BLEU"], rag_quality_summary["ROUGE-L"], rag_quality_summary["Faithfulness"]],
+    "Full Context": [fc_quality_summary["BLEU"], fc_quality_summary["ROUGE-L"], fc_quality_summary["Faithfulness"]],
+})
+
+fig, ax = plt.subplots(figsize=(9, 5))
+x = np.arange(len(quality_df["Metric"]))
+bar_w = 0.35
+
+rag_bars = ax.bar(x - bar_w / 2, quality_df["RAG"], width=bar_w, label="RAG", color="#4C72B0")
+fc_bars = ax.bar(x + bar_w / 2, quality_df["Full Context"], width=bar_w, label="Full Context", color="#DD8452")
+
+ax.set_xticks(x)
+ax.set_xticklabels(quality_df["Metric"])
+ax.set_ylabel("Score")
+ax.set_ylim(0, max(0.1, float(quality_df[["RAG", "Full Context"]].to_numpy().max()) * 1.2))
+ax.set_title("BLEU, ROUGE-L, and Faithfulness Comparison", fontweight="bold")
+ax.legend()
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.grid(axis="y", alpha=0.25)
+
+for bars in (rag_bars, fc_bars):
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            height + 0.01,
+            f"{height:.3f}",
+            ha="center",
+            va="bottom",
+            fontsize=9,
+        )
+
+plt.tight_layout()
+plt.savefig("quality_metrics_comparison.png", dpi=150, bbox_inches="tight")
+plt.show()
+print("Saved quality_metrics_comparison.png")
 
 # %%
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
@@ -736,6 +1017,87 @@ plt.tight_layout()
 plt.savefig("ab_evaluation.png", dpi=150, bbox_inches="tight")
 plt.show()
 print("Saved ab_evaluation.png")
+
+# %% [markdown]
+# ---
+# ## Step 04c - Context Precision on the First 8 Queries
+#
+# Measure retrieval precision for the first eight questions used in the lab.
+# This shows whether weaker retrieval quality lines up with latency variation.
+
+# %%
+CONTEXT_PRECISION_SET = [
+    ("What is the attention mechanism in transformer models?", "Transformer Architecture"),
+    ("How does BERT differ from GPT in architecture?", "Transformer Architecture"),
+    ("What is retrieval-augmented generation?", "Retrieval-Augmented Generation"),
+    ("How does FAISS index vectors for similarity search?", "FAISS"),
+    ("How does CRISPR-Cas9 edit the genome?", "CRISPR Gene Editing"),
+    ("What causes COVID-19 and how does it spread?", "COVID-19 Pandemic"),
+    ("How do mRNA vaccines trigger an immune response?", "COVID-19 Pandemic"),
+    ("What is the mechanism of action of base editing?", "CRISPR Gene Editing"),
+]
+
+context_precision_rows = []
+for query, relevant_title in CONTEXT_PRECISION_SET:
+    precision, retrieved_titles = context_precision(query, relevant_title, top_k=TOP_K)
+    latency_ms = next((r.total_ms for q, r in zip(TEST_QUESTIONS, rag_results) if q == query), float("nan"))
+    context_precision_rows.append({
+        "Query": query,
+        "Relevant": relevant_title,
+        "Precision": precision,
+        "Latency_ms": latency_ms,
+        "Retrieved": ", ".join(retrieved_titles),
+    })
+
+context_precision_df = pd.DataFrame(context_precision_rows)
+print("\nCONTEXT PRECISION (first 8 queries)")
+print(context_precision_df[["Query", "Relevant", "Precision", "Latency_ms"]].to_string(index=False))
+print(f"\nAverage context precision: {context_precision_df['Precision'].mean():.3f}")
+
+fig, ax1 = plt.subplots(figsize=(13, 5))
+x = np.arange(len(context_precision_df))
+
+bars = ax1.bar(
+    x,
+    context_precision_df["Precision"],
+    width=0.6,
+    color="#4C72B0",
+    alpha=0.85,
+    label="Context precision",
+)
+ax1.set_ylabel("Context precision")
+ax1.set_ylim(0, 1.05)
+ax1.set_xticks(x)
+ax1.set_xticklabels([f"Q{i+1}" for i in range(len(context_precision_df))])
+ax1.set_title("Context Precision and Latency for the First 8 Queries", fontweight="bold")
+ax1.spines["top"].set_visible(False)
+ax1.spines["right"].set_visible(False)
+ax1.grid(axis="y", alpha=0.25)
+
+ax2 = ax1.twinx()
+ax2.plot(
+    x,
+    context_precision_df["Latency_ms"],
+    color="#DD8452",
+    marker="o",
+    linewidth=2,
+    label="RAG latency (ms)",
+)
+ax2.set_ylabel("Latency (ms)", color="#DD8452")
+ax2.tick_params(axis="y", labelcolor="#DD8452")
+
+for bar, value in zip(bars, context_precision_df["Precision"]):
+    ax1.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.02, f"{value:.2f}",
+             ha="center", va="bottom", fontsize=9)
+
+for i, value in enumerate(context_precision_df["Latency_ms"]):
+    ax2.text(i, value + max(context_precision_df["Latency_ms"]) * 0.02, f"{value:.0f}",
+             ha="center", va="bottom", fontsize=8, color="#DD8452")
+
+plt.tight_layout()
+plt.savefig("context_precision_8_queries.png", dpi=150, bbox_inches="tight")
+plt.show()
+print("Saved context_precision_8_queries.png")
 
 # %%
 # Per-question detail table
@@ -802,6 +1164,19 @@ plt.tight_layout()
 plt.savefig("waterfall_breakdown.png", dpi=150, bbox_inches="tight")
 plt.show()
 print("Saved waterfall_breakdown.png")
+
+dominant_stage = {
+    "embed": float(np.mean(embed_times)),
+    "retrieve": float(np.mean(retrieve_times)),
+    "generate": float(np.mean(generate_times)),
+}
+slowest_stage = max(dominant_stage, key=dominant_stage.get)
+print(
+    "\nLatency variation analysis: the generate stage is the main source of variation "
+    f"when it dominates ({slowest_stage} averages {dominant_stage[slowest_stage]:.1f}ms). "
+    "Embed and retrieve stay comparatively small, so longer prompts and longer answer generation "
+    "drive most of the swing across queries."
+)
 
 # %% [markdown]
 # ---

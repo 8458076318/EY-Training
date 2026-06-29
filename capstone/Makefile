@@ -25,11 +25,11 @@ test-integration:
 	pytest tests/integration/ -v
 
 lint:
-	ruff check src/ frontend/ tests/
+	ruff check src/ ui/ tests/
 	mypy src/
 
 format:
-	black src/ frontend/ tests/
+	black src/ ui/ tests/
 	ruff check --fix src/
 
 build:

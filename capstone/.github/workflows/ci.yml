@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install poetry && poetry install
-      - run: poetry run ruff check src/ frontend/
+      - run: poetry run ruff check src/ ui/
       - run: poetry run mypy src/
       - run: poetry run pytest tests/ -v --cov=src --cov-report=xml
         env:

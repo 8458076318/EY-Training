@@ -8,9 +8,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from frontend.utils.auth import is_authenticated
-from frontend.pages import signup, login, dashboard, generate_plan, my_plans, feedback
-from frontend.components.notification_bell import render_notification_bell
+from ui.utils.auth import is_authenticated
+from ui.pages import signup, login, dashboard, generate_plan, my_plans, feedback
+from ui.components.notification_bell import render_notification_bell
 
 PAGES = {
     "🏠 Dashboard": dashboard,

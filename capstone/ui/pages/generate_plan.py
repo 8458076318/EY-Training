@@ -3,8 +3,8 @@ import streamlit as st
 import httpx
 import pandas as pd
 from datetime import date, timedelta
-from frontend.utils.api import API_BASE, get_auth_headers
-from frontend.utils.auth import require_auth
+from ui.utils.api import API_BASE, get_auth_headers
+from ui.utils.auth import require_auth
 
 
 def render():

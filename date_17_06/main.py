@@ -7,7 +7,7 @@ from groq import Groq
 
 app = FastAPI(title="Pipeline API with Groq")
 
-QUEUE_NAME = "input-queue"
+QUEUE_NAME = "ragqueue"
 
 
 def get_env(name: str) -> str | None:
@@ -21,7 +21,7 @@ def get_container():
         return None
 
     cosmos_client = CosmosClient(cosmos_uri, credential=cosmos_key)
-    db = cosmos_client.get_database_client("PipelineDB")
+    db = cosmos_client.get_database_client("ragprojectdb")
     return db.get_container_client("Items")
 
 
